@@ -1,0 +1,107 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal {
+  position: relative;
+  background: #fff;
+  color: #111;
+  border-radius: 16px;
+  padding: 32px 28px 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.25s ease;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;  /* ← добавили */
+  box-sizing: border-box;                                          /* ← добавили */
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+}
+.modal-close:hover { color: #000; }
+
+.modal-title {
+  margin: 0 0 8px;
+  font-size: 24px;
+  color: #0838d5;
+}
+
+.modal-plan {
+  margin: 0 0 20px;
+  font-size: 16px;
+  color: #333;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #555;
+  min-width: 0;      /* ← чтобы поле не распирало grid */
+}
+
+.modal-form input {
+  padding: 12px 14px;
+  border: 2px solid #d5d9e2;
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;        /* ← чтобы не вылезало */
+  box-sizing: border-box;  /* ← чтобы padding не увеличивал ширину */
+  font-family: inherit;    /* ← чтобы шрифт совпадал */
+}
+.modal-form input:focus { border-color: #0838d5; }
+
+.modal-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;   /* ← чтобы Срок и CVV были по верху */
+}
+
+.modal-submit {
+  margin-top: 8px;
+  padding: 14px;
+  border: none;
+  border-radius: 50px;
+  background: #0838d5;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.modal-submit:hover { background: #062a9e; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

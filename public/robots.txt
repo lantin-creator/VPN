@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /bascet
+Disallow: /admin
+Disallow: /cart
+
+Sitemap: https://pizza-online.ru/sitemap.xml

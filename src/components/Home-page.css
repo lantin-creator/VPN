@@ -1,0 +1,707 @@
+a{
+    text-decoration: none;
+    color: white;
+}
+* body{
+    margin: 0;
+    padding: 0;
+}
+.body{
+    background-color: rgba(255, 255, 255, 1);
+    position: relative;
+    width: 100%;
+    height: 952px;
+}
+.footer{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10%;
+    background-color: rgba(227, 226, 226, 1);
+    display: flex;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+.logo{
+    position: absolute;
+    width: 3.5%;
+    height: 70%;
+    background-color: black;
+    top: 13%;
+    left: 10%;
+}
+.Name-logo{
+    position: absolute;
+    top: -2%;
+    left: 14%;
+    color: rgba(17, 54, 177, 1);
+    font-size: 20px;
+}
+.conected{
+    position: absolute;
+    top: 33%;
+    left: 84%;
+    color: black;
+    font-size: 25px;
+}
+.entrance{
+    position: absolute;
+    top: 13%;
+    left: 92.3%;
+    background-color: black;
+    border-radius: 50%;
+    width: 3.5%;
+    height: 70%;
+    cursor: pointer;
+}
+.RVPN-text{
+    position: absolute;
+    top: 35%;
+    left: 9%;
+    font-size: 40px;
+    font-weight: bolder;
+    color: black;
+}
+.ten-seconds{
+    color: rgb(8, 56, 213, 1);
+    padding-left: 15px;
+}
+.Our-service{
+    position: absolute;
+    top: 47%;
+    left: 9%;
+    font-size: 40px;
+    font-weight: bolder;
+    color: black;
+}
+.favorable-price{
+    color: rgb(8, 56, 213, 1);
+}
+.Subscribebtn{
+    position: absolute;
+    top: 65%;
+    left: 9%;
+    width: 17%;
+    height: 9%;
+    border-radius: 50px;
+    border: none;
+    background-color: rgba(8, 56, 213, 1);
+    box-shadow: 0 8px 12px rgba(17, 54, 177, 0.25);
+    cursor: pointer;
+    color: white;
+    font-size: 27px;
+    font-weight: bolder;
+}
+.Design{
+    position: absolute;
+    top: 65%;
+    left: 27%;
+    width: 17%;
+    height: 9%;
+    border-radius: 50px;
+    border: 1px solid rgba(8, 56, 213, 1);
+    background-color: inherit;
+    box-shadow: 0 8px 12px rgba(17, 54, 177, 0.25);
+    cursor: pointer;
+    font-size: 27px;
+    font-weight: bolder;
+}
+.Foto-background{
+    position: absolute;
+    top: 25%;
+    left: 45%;
+    width: 55%;
+    height: 55%;
+    background-image: url(assets/7aa7453d6b5930af0ad76ad65419f0a94d2b6888.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.Advantages{
+    position: relative;
+    width: 100%;
+    height: 952px;
+}
+.advantages{
+    position: absolute;
+    top: 10%;
+    left: 41.5%;
+    font-size: 24px;
+    color: rgba(8, 56, 213, 1);
+    font-weight: bolder;
+    text-shadow: 0 4px 4px rgba(8, 56, 213, 0.25);
+}
+.Cross-platform{
+    position: absolute;
+    top: 30%;
+    left: 10%;
+    width: 20%;
+    height: 17%;
+    border-radius: 12px;
+    border: 3px solid black;
+    background-color: inherit;
+    box-shadow: -4px 4px 4px rgba(0, 0, 0, 0.25);
+}
+.Cross-platform-headline{
+    position: absolute;
+    top: 20%;
+    left: 23%;
+    font-size: 22px;
+    font-weight: bolder;
+    color: rgba(8, 56, 213, 1);
+}
+.Cross-platform-icon{
+    position: absolute;
+    top: 35%;
+    left: 5%;
+    height: 48px;
+    width: 48px;
+    background-image: url(assets/monitor.png);
+}
+.Cross-platform-text{
+    position: absolute;
+    top: 35%;
+    left: 22%;
+    font-size: 20px;
+}
+.Regions{
+    position: absolute;
+    top: 30%;
+    left: 40%;
+    width: 20%;
+    height: 17%;
+    border-radius: 12px;
+    border: 3px solid black;
+    background-color: inherit;
+    box-shadow: -4px 4px 4px rgba(0, 0, 0, 0.25);
+}
+.Regions-headline{
+    position: absolute;
+    top: 20%;
+    left: 25%;
+    font-size: 27px;
+    font-weight: bolder;
+    color: rgba(8, 56, 213, 1);
+}
+.Regions-icon{
+    position: absolute;
+    top: 35%;
+    left: 5%;
+    height: 48px;
+    width: 48px;
+    background-image: url(assets/hard-drive.png);
+}
+.Regions-text{
+    position: absolute;
+    top: 35%;
+    left: 25%;
+    font-size: 20px;
+}
+.Speed{
+    position: absolute;
+    top: 30%;
+    left: 70%;
+    width: 20%;
+    height: 17%;
+    border-radius: 12px;
+    border: 3px solid black;
+    background-color: inherit;
+    box-shadow: -4px 4px 4px rgba(0, 0, 0, 0.25);
+}
+.Speed-headline{
+    position: absolute;
+    top: 28%;
+    left: 25%;
+    font-size: 27px;
+    font-weight: bolder;
+    color: rgba(8, 56, 213, 1);
+}
+.Speed-icon{
+    position: absolute;
+    top: 35%;
+    left: 5%;
+    height: 48px;
+    width: 48px;
+    background-image: url(assets/rss.png);
+}
+.Speed-text{
+    position: absolute;
+    top: 43%;
+    left: 25%;
+    font-size: 20px;
+}
+.TechnicalSupport{
+    position: absolute;
+    top: 60%;
+    left: 40%;
+    width: 20%;
+    height: 13%;
+    border-radius: 12px;
+    border: 3px solid black;
+    background-color: inherit;
+    box-shadow: -4px 4px 4px rgba(0, 0, 0, 0.25);
+}
+.TechnicalSupport-headline{
+    position: absolute;
+    top: 13%;
+    left: 20%;
+    font-size: 27px;
+    font-weight: bolder;
+    color: rgba(8, 56, 213, 1);
+}
+.TechnicalSupport-icon{
+    position: absolute;
+    top: 30%;
+    left: 4%;
+    height: 48px;
+    width: 48px;
+    background-image: url(assets/smartphone.png);
+}
+.TechnicalSupport-text{
+    position: absolute;
+    top: 33%;
+    left: 20%;
+    font-size: 20px;
+}
+.text2{
+    position: absolute;
+    top: 69%;
+    left: 20%;
+    font-size: 20px;
+}
+.TechnicalSupport2{
+    position: absolute;
+    top: 60%;
+    left: 55%;
+    width: 20%;
+    height: 13%;
+    border-radius: 12px;
+    border: 3px solid black;
+    background-color: inherit;
+    box-shadow: -4px 4px 4px rgba(0, 0, 0, 0.25);
+}
+.TechnicalSupport-headline2{
+    position: absolute;
+    top: 13%;
+    left: 20%;
+    font-size: 27px;
+    font-weight: bolder;
+    color: rgba(8, 56, 213, 1);
+}
+.TechnicalSupport-icon2{
+    position: absolute;
+    top: 30%;
+    left: 4%;
+    height: 48px;
+    width: 48px;
+    background-image: url(assets/smartphone.png);
+}
+.TechnicalSupport-text2{
+    position: absolute;
+    top: 33%;
+    left: 20%;
+    font-size: 20px;
+}
+.text22{
+    position: absolute;
+    top: 69%;
+    left: 20%;
+    font-size: 20px;
+}
+#Rates{
+    position: relative;
+    width: 100%;
+    height: 902px;
+}
+.rates–Subheading{
+    position: absolute;
+    top: 5%;
+    left: 41.5%;
+    font-size: 24px;
+    color: rgba(8, 56, 213, 1);
+    font-weight: bolder;
+}
+.rates-container{
+    width: 100%;
+    height: 50%;
+    padding-top: 220px;
+    display: flex;
+    flex-direction: row;
+}
+.rates1{
+    position: relative;
+    align-items: center;
+    width: 20%;
+    height: 100%;
+    border: 3px solid rgba(8, 56, 213, 1);
+    border-radius: 12px;
+    background-color: inherit;
+    box-shadow: -4px 4px 4px rgba(8, 56, 213, 0.25);
+    margin-left: 225px;
+}
+.rates1-subheading{
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    font-size: 30px;
+    font-weight: bolder;
+}
+.rates1-hr{
+    position: absolute;
+    top: 17%;
+    left: 10%;
+    width: 80%;
+    border: none;
+    height: 2px;
+    background-color: black;
+}
+.text1{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 35% 10% 5%;
+    font-size: 25px;
+    font-weight: bold;
+}
+.AI{
+    font-weight: bolder;
+    color: rgba(177, 131, 31, 1);
+    margin-left: 30px;
+}
+.Guarantee{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 10%;
+    font-size: 23px;
+    font-weight: bold;
+}
+.price{
+    font-size: 25px;
+    font-weight: bolder;
+    padding: 17% 10%;
+}
+.rates2-hr{
+    position: absolute;
+    top: 75%;
+    left: 10%;
+    width: 80%;
+    border: none;
+    height: 2px;
+    background-color: black;
+}
+.btn-Design{
+    position: absolute;
+    top: 80%;
+    left: 13.5%;
+    width: 70%;
+    height: 15%;
+    border: 3px solid rgba(8, 56, 213, 1);
+    font-size: 25px;
+    font-weight: bolder;
+    background-color: inherit;
+    color: rgba(8, 56, 213, 1);
+    border-radius: 50px;
+    cursor: pointer;
+}
+.rates2{
+    position: relative;
+    align-items: center;
+    width: 20%;
+    height: 100%;
+    border: 3px solid rgba(8, 56, 213, 1);
+    border-radius: 12px;
+    background-color: inherit;
+    box-shadow: -4px 4px 4px rgba(8, 56, 213, 0.25);
+    margin-left: 125px;
+}
+.rates2-subheading{
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    font-size: 30px;
+    font-weight: bolder;
+    color: rgba(255, 174, 0, 1);
+}
+.popular{
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    font-size: 30px;
+    font-weight: bolder;
+    color:rgba(255, 174, 0, 1);
+}
+.rates3-hr{
+    position: absolute;
+    top: 17%;
+    left: 10%;
+    width: 80%;
+    border: none;
+    height: 2px;
+    background-color: black;
+}
+.text2{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 30.5%;
+    left: 11%;
+    font-size: 25px;
+    font-weight: bold;
+}
+.AI2{
+    font-weight: bolder;
+    color: rgba(177, 131, 31, 1);
+    margin-left: 30px;
+}
+.Guarantee2{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 41%;
+    left: 11%;
+    font-size: 23px;
+    font-weight: bold;
+}
+.Cross-platform-capability{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 51%;
+    left: 11%;
+    font-size: 23px;
+    font-weight: bold;
+}
+.price2{
+    font-size: 25px;
+    font-weight: bolder;
+    padding: 79.5% 10%;
+   color: rgba(255, 174, 0, 1);
+}
+.rates4-hr{
+    position: absolute;
+    top: 75%;
+    left: 10%;
+    width: 80%;
+    border: none;
+    height: 2px;
+    background-color: black;
+}
+.btn-Design2{
+    position: absolute;
+    top: 80%;
+    left: 13.5%;
+    width: 70%;
+    height: 15%;
+    border: 3px solid rgba(8, 56, 213, 1);
+    font-size: 25px;
+    font-weight: bolder;
+    background-color: inherit;
+    color: rgba(8, 56, 213, 1);
+    border-radius: 50px;
+    cursor: pointer;
+}
+.rates3{
+    position: relative;
+    align-items: center;
+    width: 20%;
+    height: 100%;
+    border: 3px solid rgba(8, 56, 213, 1);
+    border-radius: 12px;
+    background-color: inherit;
+    box-shadow: -4px 4px 4px rgba(8, 56, 213, 0.25);
+    margin-left: 150px;
+}
+.rates3-subheading{
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    font-size: 30px;
+    font-weight: bolder;
+    color: rgba(0, 0, 0, 1);
+}
+.popular2{
+    position: absolute;
+    top: 10%;
+    left: 59%;
+    font-size: 30px;
+    font-weight: bolder;
+    color:rgba(255, 174, 0, 1);
+}
+.rates5-hr{
+    position: absolute;
+    top: 17%;
+    left: 10%;
+    width: 80%;
+    border: none;
+    height: 2px;
+    background-color: black;
+}
+.text3{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 30.5%;
+    left: 11%;
+    font-size: 25px;
+    font-weight: bold;
+}
+.AI3{
+    font-weight: bolder;
+    color: rgba(177, 131, 31, 1);
+    margin-left: 30px;
+}
+.Guarantee3{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 41%;
+    left: 11%;
+    font-size: 23px;
+    font-weight: bold;
+}
+.Cross-platform-capability2{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 51%;
+    left: 11%;
+    font-size: 23px;
+    font-weight: bold;
+}
+.price3{
+    font-size: 25px;
+    font-weight: bolder;
+    padding: 79.5% 10%;
+    color: rgba(0, 0, 0, 1);
+}
+.rates6-hr{
+    position: absolute;
+    top: 75%;
+    left: 10%;
+    width: 80%;
+    border: none;
+    height: 2px;
+    background-color: black;
+}
+.btn-Design3{
+    position: absolute;
+    top: 80%;
+    left: 13.5%;
+    width: 70%;
+    height: 15%;
+    border: 3px solid rgba(8, 56, 213, 1);
+    font-size: 25px;
+    font-weight: bolder;
+    background-color: inherit;
+    color: rgba(8, 56, 213, 1);
+    border-radius: 50px;
+    cursor: pointer;
+}
+#Connection-method{
+    position: relative;
+    width: 100%;
+    height: 900px;
+    display: flex;
+}
+.Connection-method{
+    position: absolute;
+    top: 10%;
+    left: 37%;
+    color: rgba(8, 56, 213, 1);
+    font-size: 45px;
+    font-weight: bolder;
+}
+.Stage1{
+    position: absolute;
+    top: 40%;
+    left: 15%;
+    color: black;
+    font-size: 30px;
+    font-weight: bolder;
+}
+.Stage1-text{
+    position: absolute;
+    top: 45%;
+    left: 15%;
+    color: black;
+    font-size: 25px;
+    width: 300px;
+}
+.Stage2{
+    position: absolute;
+    top: 40%;
+    left: 40%;
+    color: black;
+    font-size: 30px;
+    font-weight: bolder;
+}
+.Stage2-text{
+    position: absolute;
+    top: 45%;
+    left: 40%;
+    color: black;
+    font-size: 25px;
+    width: 450px;
+}
+.Stage2-text2{
+    position: absolute;
+    top: 47%;
+    left: 40%;
+    color: black;
+    font-size: 25px;
+    width: 450px;
+}
+.Stage3{
+    position: absolute;
+    top: 40%;
+    left: 70%;
+    color: black;
+    font-size: 30px;
+    font-weight: bolder;
+}
+.Stage3-text{
+    position: absolute;
+    top: 45%;
+    left: 70%;
+    color: black;
+    font-size: 25px;
+    width: 450px;
+}
+.hr{
+    position: absolute;
+    top: 52%;
+    left: 15%;
+    width: 66%;
+    border: none;
+    height: 4px;
+    background-color: black;
+}
+.footer2{
+    position: relative;
+    background-color: rgba(158, 158, 158, 1);
+    width: 100%;
+    height: 200px;
+    margin-top: auto;
+}
+.question{
+    position: absolute;
+    top: 25%;
+    left: 10%;
+    color: white;
+    font-size: 30px;
+    font-weight: bolder;
+}
+.question2{
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    color: white;
+    font-size: 30px;
+    font-weight: bolder;
+}
