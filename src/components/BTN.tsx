@@ -1,4 +1,4 @@
-import NavigationButton from "./navigationbutton";
+import NavigationButton from "./navigationbutton.tsx";
 
 const Btn = () => {
     return(

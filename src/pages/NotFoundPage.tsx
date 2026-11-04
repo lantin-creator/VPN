@@ -13,7 +13,7 @@ const NotFoundPage = () => {
           <br />
           или вы ошиблись в адресе.
         </p>
-        <Link to="/" className="notfound-btn">
+        <Link to="/VPN/" className="notfound-btn">
           Вернуться на главную
         </Link>
       </div>
