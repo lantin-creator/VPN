@@ -1,11 +1,21 @@
 import { useCallback, useState } from 'react'
+interface Plan {
+  title: string
+  price: string
+}
+interface PaymentFormData {
+  name: string
+  card: string
+  expiry: string
+  cvv: string
+}
 
 export const useSubscription = () => {
-  const [selectedPlan, setSelectedPlan] = useState(null) 
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [toast, setToast] = useState(null)
+const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
+const [isModalOpen, setIsModalOpen] = useState(false)
+const [toast, setToast] = useState<{ message: string; id: number } | null>(null)
 
-  const openModal = useCallback((plan) => {
+  const openModal = useCallback((plan: Plan) => {
     setSelectedPlan(plan)
     setIsModalOpen(true)
   }, [])
@@ -15,7 +25,7 @@ export const useSubscription = () => {
     setTimeout(() => setSelectedPlan(null), 200)
   }, [])
 
-  const showToast = useCallback((message) => {
+  const showToast = useCallback((message: string) => {
     const id = Date.now()
     setToast({ message, id })
     setTimeout(() => {
@@ -26,14 +36,29 @@ export const useSubscription = () => {
   const hideToast = useCallback(() => setToast(null), [])
 
   const submitPayment = useCallback(
-    (formData) => {
-      console.log('Оплата:', { plan: selectedPlan, ...formData })
-      const planTitle = selectedPlan?.title ?? 'подписку'
-      showToast(`Вы оформили подписку «${planTitle}»`)
-      closeModal()
-    },
-    [selectedPlan, showToast, closeModal]
-  )
+  async (formData: PaymentFormData) => {
+    try {
+      const response = await fetch('/api/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: selectedPlan, ...formData }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        const planTitle = selectedPlan?.title ?? 'подписку'
+        showToast(`Вы оформили подписку «${planTitle}»`)
+        closeModal()
+      } else {
+        showToast(data.message ?? 'Оплата не прошла')
+      }
+    } catch {
+      showToast('Ошибка сети. Попробуйте позже.')
+    }
+  },
+  [selectedPlan, showToast, closeModal]
+)
 
   return {
     selectedPlan,
