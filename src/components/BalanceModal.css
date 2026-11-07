@@ -1,0 +1,268 @@
+
+.balance-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(5px);
+
+    animation: balanceOverlayAppear 0.2s ease;
+}
+
+.balance-modal {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+
+    padding: 35px;
+
+    background: #fff;
+    color: #171717;
+
+    border-radius: 22px;
+
+    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.25);
+
+    animation: balanceModalAppear 0.25s ease;
+}
+
+.balance-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 18px;
+
+    width: 35px;
+    height: 35px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #f1f1f1;
+    color: #333;
+
+    font-size: 25px;
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+.balance-modal-close:hover {
+    background: #e0e0e0;
+}
+
+.balance-modal-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.balance-modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 60px;
+    height: 60px;
+
+    margin: 0 auto 16px;
+
+    background: rgba(8, 56, 213, 0.1);
+    color: rgba(8, 56, 213, 1);
+
+    border-radius: 18px;
+}
+
+.balance-modal-icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+.balance-modal-header h2 {
+    margin: 0 0 10px;
+
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.balance-modal-header p {
+    margin: 0;
+
+    color: #777;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.balance-modal-presets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+
+    margin-bottom: 24px;
+}
+
+.balance-preset {
+    padding: 13px;
+
+    background: #f5f6fa;
+    color: #222;
+
+    border: 2px solid transparent;
+    border-radius: 12px;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.balance-preset:hover {
+    border-color: rgba(8, 56, 213, 0.5);
+}
+
+.balance-preset.active {
+    background: rgba(8, 56, 213, 0.08);
+    color: rgba(8, 56, 213, 1);
+    border-color: rgba(8, 56, 213, 1);
+}
+
+.balance-modal-label {
+    display: block;
+
+    margin-bottom: 10px;
+
+    color: #555;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.balance-input-wrapper {
+    display: flex;
+    align-items: center;
+
+    padding: 0 15px;
+
+    background: #f5f6fa;
+    border: 2px solid #e8e8e8;
+    border-radius: 12px;
+
+    transition: border-color 0.2s ease;
+}
+
+.balance-input-wrapper:focus-within {
+    border-color: rgba(8, 56, 213, 1);
+}
+
+.balance-input-wrapper input {
+    width: 100%;
+    padding: 14px 0;
+
+    background: transparent;
+    border: none;
+    outline: none;
+
+    color: #171717;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.balance-input-wrapper span {
+    color: #777;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.balance-input-error {
+    margin: 8px 0 0;
+    color: #d93025;
+    font-size: 12px;
+}
+
+.balance-modal-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin: 25px 0;
+    padding: 17px;
+
+    background: #f5f6fa;
+    border-radius: 12px;
+}
+
+.balance-modal-summary span {
+    color: #666;
+    font-size: 14px;
+}
+
+.balance-modal-summary strong {
+    color: #171717;
+    font-size: 20px;
+}
+
+.balance-submit {
+    width: 100%;
+    padding: 16px;
+
+    background: rgba(8, 56, 213, 1);
+    color: white;
+
+    border: none;
+    border-radius: 12px;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.balance-submit:hover:not(:disabled) {
+    background: #062cae;
+    transform: translateY(-2px);
+}
+
+.balance-submit:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+@keyframes balanceOverlayAppear {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes balanceModalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .balance-modal {
+        padding: 28px 22px;
+    }
+
+    .balance-modal-header h2 {
+        font-size: 21px;
+    }
+}

@@ -4,6 +4,8 @@ const RatesContainer = () => {
   return (
     <div className="rates-container">
       <Rates
+        planId="month"
+        Subscription_price={299}
         Ratesclass="rates1"
         Ratessubheading="rates1-subheading"
         subheadingChild="1 Месяц"
@@ -18,6 +20,8 @@ const RatesContainer = () => {
         BTNClass="btn-Design"
       />
       <Rates
+        planId="quarter"
+        Subscription_price={499}
         Ratesclass="rates2"
         Ratessubheading="rates2-subheading"
         subheadingChild="3 Месяца"
@@ -34,6 +38,8 @@ const RatesContainer = () => {
         BTNClass="btn-Design2"
       />
       <Rates
+        planId="year"
+        Subscription_price={1699}
         Ratesclass="rates3"
         Ratessubheading="rates3-subheading"
         subheadingChild="1 год"

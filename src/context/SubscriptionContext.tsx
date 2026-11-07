@@ -1,21 +1,35 @@
 import { createContext, useContext } from 'react'
+import type { ReactNode } from 'react'
 import { useSubscription } from '../hooks/useSubscription'
 
-const SubscriptionContext = createContext(null)
+type SubscriptionType = ReturnType<typeof useSubscription>
 
-export const SubscriptionProvider = ({ children }) => {
-  const subscription = useSubscription()
-  return (
-    <SubscriptionContext.Provider value={subscription}>
-      {children}
-    </SubscriptionContext.Provider>
-  )
+interface SubscriptionProviderProps {
+    children: ReactNode
 }
 
-export const useSubscriptionContext = () => {
-  const ctx = useContext(SubscriptionContext)
-  if (!ctx) {
-    throw new Error('useSubscriptionContext must be used within SubscriptionProvider')
-  }
-  return ctx
+const SubscriptionContext = createContext<SubscriptionType | null>(null)
+
+export const SubscriptionProvider = ({
+    children,
+}: SubscriptionProviderProps) => {
+    const subscription = useSubscription()
+
+    return (
+        <SubscriptionContext.Provider value={subscription}>
+            {children}
+        </SubscriptionContext.Provider>
+    )
+}
+
+export const useSubscriptionContext = (): SubscriptionType => {
+    const ctx = useContext(SubscriptionContext)
+
+    if (!ctx) {
+        throw new Error(
+            'useSubscriptionContext must be used within SubscriptionProvider'
+        )
+    }
+
+    return ctx
 }
