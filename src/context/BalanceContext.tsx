@@ -3,202 +3,150 @@ import {
     useCallback,
     useContext,
     useEffect,
-    useMemo,
-    useRef,
     useState,
+    type ReactNode,
 } from 'react'
-import type { ReactNode } from 'react'
 
-interface BalanceState {
-    available: number
+import { useAuth } from './AuthContext'
+import {
+    getBalance,
+    topUpBalance,
+    type BalanceData,
+} from '../api/balance.api'
+
+interface BalanceContextValue {
+    balance: number
     frozen: number
+    available: number
+    isLoading: boolean
+    error: string | null
+    refreshBalance: () => Promise<void>
+    topUp: (amount: number) => Promise<void>
 }
 
-interface BalanceContextValue extends BalanceState {
-    topUp: (amount: number) => boolean
-    freeze: (amount: number) => boolean
-    confirmPayment: (amount: number) => boolean
-    refund: (amount: number) => boolean
-}
+const BalanceContext = createContext<BalanceContextValue | undefined>(
+    undefined,
+)
 
-interface BalanceProviderProps {
-    children: ReactNode
-}
+export const BalanceProvider = ({ children }: { children: ReactNode }) => {
+    const { token, user, isLoading: isAuthLoading } = useAuth()
 
-const STORAGE_KEY = 'rvpnBalance'
-const LEGACY_STORAGE_KEY = 'numericAmount'
-
-const INITIAL_BALANCE: BalanceState = {
-    available: 500,
-    frozen: 0,
-}
-
-const isValidAmount = (amount: number): boolean =>
-    Number.isSafeInteger(amount) && amount > 0
-
-const loadBalance = (): BalanceState => {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY)
-
-        if (saved !== null) {
-            const parsed: unknown = JSON.parse(saved)
-
-            if (
-                typeof parsed === 'object' &&
-                parsed !== null &&
-                'available' in parsed &&
-                'frozen' in parsed &&
-                typeof parsed.available === 'number' &&
-                typeof parsed.frozen === 'number' &&
-                Number.isSafeInteger(parsed.available) &&
-                Number.isSafeInteger(parsed.frozen) &&
-                parsed.available >= 0 &&
-                parsed.frozen >= 0
-            ) {
-                return {
-                    available: parsed.available,
-                    frozen: parsed.frozen,
-                }
-            }
-
-            return INITIAL_BALANCE
-        }
-
-        const legacy = localStorage.getItem(LEGACY_STORAGE_KEY)
-
-        if (legacy !== null) {
-            const amount = Number(legacy)
-
-            if (Number.isSafeInteger(amount) && amount >= 0) {
-                return { available: amount, frozen: 0 }
-            }
-        }
-    } catch {
-        return INITIAL_BALANCE
-    }
-
-    return INITIAL_BALANCE
-}
-
-const BalanceContext = createContext<BalanceContextValue | null>(null)
-
-export const BalanceProvider = ({ children }: BalanceProviderProps) => {
-    const [balance, setBalance] = useState<BalanceState>(loadBalance)
-    const balanceRef = useRef(balance)
-
-    const updateBalance = useCallback(
-        (updater: (current: BalanceState) => BalanceState): BalanceState => {
-            const next = updater(balanceRef.current)
-
-            balanceRef.current = next
-            setBalance(next)
-
-            return next
-        },
-        []
-    )
-
-    useEffect(() => {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(balance))
-        } catch {
-            console.error('Не удалось сохранить баланс')
-        }
-    }, [balance])
-
-    const topUp = useCallback((amount: number): boolean => {
-    if (!isValidAmount(amount)) return false
-
-    let success = false
-
-    updateBalance((current) => {
-        const available = current.available + amount
-
-        if (!Number.isSafeInteger(available)) return current
-
-        success = true
-
-        return { ...current, available }
+    const [balanceData, setBalanceData] = useState<BalanceData>({
+        balance: 0,
+        frozenBalance: 0,
+        availableBalance: 0,
     })
 
-    return success
-    }, [updateBalance])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
-    const freeze = useCallback((amount: number): boolean => {
-        if (!isValidAmount(amount)) return false
+    const refreshBalance = useCallback(async () => {
+        if (!token || !user) {
+            setBalanceData({
+                balance: 0,
+                frozenBalance: 0,
+                availableBalance: 0,
+            })
+            return
+        }
 
-        let success = false
+        try {
+            setError(null)
 
-        updateBalance((current) => {
-            if (current.available < amount) return current
+            const response = await getBalance(token)
+            setBalanceData(response.data)
+        } catch (err) {
+            const message =
+                err instanceof Error
+                    ? err.message
+                    : 'Не удалось загрузить баланс'
 
-            success = true
+            setError(message)
+            throw err
+        }
+    }, [token, user])
 
-            return {
-                available: current.available - amount,
-                frozen: current.frozen + amount,
+    useEffect(() => {
+        if (isAuthLoading) return
+
+        let cancelled = false
+
+        const loadBalance = async () => {
+            setIsLoading(true)
+
+            try {
+                if (!token || !user) {
+                    setBalanceData({
+                        balance: 0,
+                        frozenBalance: 0,
+                        availableBalance: 0,
+                    })
+                    return
+                }
+
+                const response = await getBalance(token)
+
+                if (!cancelled) {
+                    setBalanceData(response.data)
+                    setError(null)
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    setError(
+                        err instanceof Error
+                            ? err.message
+                            : 'Не удалось загрузить баланс',
+                    )
+                }
+            } finally {
+                if (!cancelled) {
+                    setIsLoading(false)
+                }
             }
-        })
+        }
 
-        return success
-    }, [updateBalance])
+        void loadBalance()
 
-    const confirmPayment = useCallback((amount: number): boolean => {
-        if (!isValidAmount(amount)) return false
+        return () => {
+            cancelled = true
+        }
+    }, [token, user, isAuthLoading])
 
-        let success = false
-
-        updateBalance((current) => {
-            if (current.frozen < amount) return current
-
-            success = true
-
-            return {
-                ...current,
-                frozen: current.frozen - amount,
+    const topUp = useCallback(
+        async (amount: number) => {
+            if (!token || !user) {
+                throw new Error('Необходимо войти в аккаунт')
             }
-        })
 
-        return success
-    }, [updateBalance])
-
-    const refund = useCallback((amount: number): boolean => {
-        if (!isValidAmount(amount)) return false
-
-        let success = false
-
-        updateBalance((current) => {
-            if (current.frozen < amount) return current
-
-            const available = current.available + amount
-
-            if (!Number.isSafeInteger(available)) return current
-
-            success = true
-
-            return {
-                available,
-                frozen: current.frozen - amount,
+            if (!Number.isInteger(amount) || amount < 1 || amount > 10000) {
+                throw new Error('Сумма должна быть от 1 до 10 000 ₽')
             }
-        })
 
-        return success
-    }, [updateBalance])
+            setError(null)
 
-    const contextValue = useMemo(
-        () => ({
-            available: balance.available,
-            frozen: balance.frozen,
-            topUp,
-            freeze,
-            confirmPayment,
-            refund,
-        }),
-        [balance, topUp, freeze, confirmPayment, refund]
+            await topUpBalance(
+                token,
+                amount * 100,
+                crypto.randomUUID(),
+            )
+
+            await refreshBalance()
+        },
+        [token, user, refreshBalance],
     )
 
     return (
-        <BalanceContext.Provider value={contextValue}>
+        <BalanceContext.Provider
+            value={{
+                balance: balanceData.balance,
+                frozen: balanceData.frozenBalance,
+                available: balanceData.availableBalance,
+                isLoading,
+                error,
+                refreshBalance,
+                topUp,
+            }}
+        >
             {children}
         </BalanceContext.Provider>
     )
@@ -209,7 +157,7 @@ export const useBalanceContext = () => {
 
     if (!context) {
         throw new Error(
-            'useBalanceContext must be used within BalanceProvider'
+            'useBalanceContext должен использоваться внутри BalanceProvider',
         )
     }
 

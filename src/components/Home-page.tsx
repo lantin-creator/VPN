@@ -10,16 +10,15 @@ import {
     SubscriptionProvider,
     useSubscriptionContext
 } from '../context/SubscriptionContext'
-import { BalanceProvider } from '../context/BalanceContext'
 
 const HomePageContent = (): ReactElement => {
     const {
-        isModalOpen,
         selectedPlan,
-        closeModal,
-        submitPayment,
+        isModalOpen,
         toast,
-        hideToast
+        closeModal,
+        hideToast,
+        submitPayment,
     } = useSubscriptionContext()
 
     return (
@@ -129,21 +128,21 @@ const HomePageContent = (): ReactElement => {
                 onSubmit={submitPayment}
             />
 
-            <Toast
-                message={toast?.message ?? ''}
-                onClose={hideToast}
-            />
+            {toast && (
+                <Toast
+                    message={toast}
+                    onClose={hideToast}
+                />
+            )}
         </>
     )
 }
 
 
 const HomePage = (): ReactElement => (
-    <BalanceProvider>
         <SubscriptionProvider>
             <HomePageContent />
         </SubscriptionProvider>
-    </BalanceProvider>
 )
 
 export default HomePage

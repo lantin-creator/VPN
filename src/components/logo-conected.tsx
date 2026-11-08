@@ -1,11 +1,12 @@
-
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom';
 
 interface LogoConnectProps {
     firstclassName?: string
     secondclassName?: string
     firstChild?: ReactNode
     secondChild?: ReactNode
+    Link_auth?: string
 }
 
 const LogoConnect = ({
@@ -13,6 +14,7 @@ const LogoConnect = ({
     secondclassName = '',
     firstChild,
     secondChild,
+    Link_auth,
 }: LogoConnectProps) => {
     return (
         <>
@@ -21,7 +23,15 @@ const LogoConnect = ({
             </div>
 
             <div className={secondclassName}>
-                <h1>{secondChild}</h1>
+                {Link_auth ? (
+            <Link
+                to={Link_auth}
+            >
+                    <h1>{secondChild}</h1>
+            </Link>
+                ) : (
+                    <h1>{secondChild}</h1>
+                )}
             </div>
         </>
     )

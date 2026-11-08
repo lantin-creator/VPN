@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubscriptionPlan {
+  MONTH
+  QUARTER
+  YEAR
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  REFUNDED
+  EXPIRED
+}
+
+enum BalanceTransactionType {
+  TOP_UP
+  SUBSCRIPTION_PAYMENT
+  REFUND
+}
+
+model User {
+  id           String @id @default(uuid())
+  email        String @unique
+  passwordHash String
+
+  firstName String?
+  lastName  String?
+  birthDate DateTime?
+  city      String?
+  phone     String?
+
+  balance       Int @default(50000)
+  frozenBalance Int @default(0)
+
+  subscriptions       Subscription[]
+  reservations        BalanceReservation[]
+  balanceTransactions BalanceTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subscription {
+  id     String @id @default(uuid())
+  userId String
+
+  plan        SubscriptionPlan
+  status      SubscriptionStatus @default(ACTIVE)
+  price       Int
+  startedAt   DateTime           @default(now())
+  expiresAt   DateTime
+  cancelledAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status, expiresAt])
+}
+
+model BalanceReservation {
+  id             String           @id @default(uuid())
+  userId         String
+  amount         Int
+  plan           SubscriptionPlan
+  idempotencyKey String           @unique
+
+  status ReservationStatus @default(PENDING)
+  expiresAt DateTime
+
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions BalanceTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+}
+
+model BalanceTransaction {
+  id            String  @id @default(uuid())
+  userId        String
+  reservationId String?
+  idempotencyKey String? @unique
+
+  type        BalanceTransactionType
+  amount      Int
+  description String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  reservation BalanceReservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([reservationId])
+}

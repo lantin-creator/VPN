@@ -5,7 +5,7 @@ import './BalanceModal.css'
 interface BalanceModalProps {
     isOpen: boolean
     onClose: () => void
-    onTopUp: (amount: number) => void
+    onTopUp: (amount: number) => Promise<void>
 }
 
 const presetAmounts = [100, 500, 1000, 2000]
@@ -16,12 +16,14 @@ const BalanceModal = ({
     onTopUp,
 }: BalanceModalProps) => {
     const [amount, setAmount] = useState('500')
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         if (!isOpen) return
 
         const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
+            if (event.key === 'Escape' && !isSubmitting) {
                 onClose()
             }
         }
@@ -31,7 +33,13 @@ const BalanceModal = ({
         return () => {
             window.removeEventListener('keydown', handleEscape)
         }
-    }, [isOpen, onClose])
+    }, [isOpen, isSubmitting, onClose])
+
+    useEffect(() => {
+        if (isOpen) {
+            setError(null)
+        }
+    }, [isOpen])
 
     if (!isOpen) return null
 
@@ -41,23 +49,36 @@ const BalanceModal = ({
         amount.trim() !== '' &&
         Number.isInteger(numericAmount) &&
         numericAmount >= 1 &&
-        numericAmount <= 1000000
+        numericAmount <= 10000
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
-        if (!isValidAmount) return
+        if (!isValidAmount || isSubmitting) return
 
-        onTopUp(numericAmount)
+        setIsSubmitting(true)
+        setError(null)
 
-        setAmount('500')
-        onClose()
+        try {
+            await onTopUp(numericAmount)
+
+            setAmount('500')
+            onClose()
+        } catch (err) {
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Не удалось пополнить баланс',
+            )
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     return (
         <div
             className="balance-modal-overlay"
-            onClick={onClose}
+            onClick={() => !isSubmitting && onClose()}
         >
             <div
                 className="balance-modal"
@@ -71,6 +92,7 @@ const BalanceModal = ({
                     type="button"
                     onClick={onClose}
                     aria-label="Закрыть окно"
+                    disabled={isSubmitting}
                 >
                     ×
                 </button>
@@ -111,6 +133,7 @@ const BalanceModal = ({
                                     numericAmount === preset ? 'active' : ''
                                 }`}
                                 onClick={() => setAmount(String(preset))}
+                                disabled={isSubmitting}
                             >
                                 {preset.toLocaleString('ru-RU')} ₽
                             </button>
@@ -129,12 +152,13 @@ const BalanceModal = ({
                             id="balance-amount-input"
                             type="number"
                             min="1"
-                            max="1000000"
+                            max="10000"
                             step="1"
                             value={amount}
                             onChange={(event) => setAmount(event.target.value)}
                             placeholder="Введите сумму"
                             required
+                            disabled={isSubmitting}
                         />
 
                         <span>₽</span>
@@ -142,7 +166,13 @@ const BalanceModal = ({
 
                     {!isValidAmount && amount !== '' && (
                         <p className="balance-input-error">
-                            Введите сумму от 1 до 1 000 000 ₽
+                            Введите сумму от 1 до 10 000 ₽
+                        </p>
+                    )}
+
+                    {error && (
+                        <p className="balance-input-error">
+                            {error}
                         </p>
                     )}
 
@@ -159,9 +189,11 @@ const BalanceModal = ({
                     <button
                         className="balance-submit"
                         type="submit"
-                        disabled={!isValidAmount}
+                        disabled={!isValidAmount || isSubmitting}
                     >
-                        Пополнить баланс
+                        {isSubmitting
+                            ? 'Обрабатываем…'
+                            : 'Пополнить баланс'}
                     </button>
                 </form>
             </div>
