@@ -1,4 +1,3 @@
-
 import { useCallback, useState } from 'react'
 import { useBalanceContext } from '../context/BalanceContext'
 
@@ -116,7 +115,6 @@ export const useSubscription = () => {
         ]
     )
 
-    // ВАЖНО: возвращаем все состояния и функции
     return {
         selectedPlan,
         isModalOpen,

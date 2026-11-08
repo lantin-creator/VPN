@@ -107,17 +107,21 @@ export const BalanceProvider = ({ children }: BalanceProviderProps) => {
     }, [balance])
 
     const topUp = useCallback((amount: number): boolean => {
-        if (!isValidAmount(amount)) return false
+    if (!isValidAmount(amount)) return false
 
-        const next = updateBalance((current) => {
-            const available = current.available + amount
+    let success = false
 
-            if (!Number.isSafeInteger(available)) return current
+    updateBalance((current) => {
+        const available = current.available + amount
 
-            return { ...current, available }
-        })
+        if (!Number.isSafeInteger(available)) return current
 
-        return next.available >= amount
+        success = true
+
+        return { ...current, available }
+    })
+
+    return success
     }, [updateBalance])
 
     const freeze = useCallback((amount: number): boolean => {
