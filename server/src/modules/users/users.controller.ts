@@ -14,7 +14,6 @@ export const getProfile = async (
         })
         return
     }
-
     try {
         const user = await prisma.user.findUnique({
             where: {
@@ -33,7 +32,6 @@ export const getProfile = async (
                 updatedAt: true,
             },
         })
-
         if (!user) {
             res.status(404).json({
                 success: false,
@@ -41,7 +39,6 @@ export const getProfile = async (
             })
             return
         }
-
         res.status(200).json({
             success: true,
             user,

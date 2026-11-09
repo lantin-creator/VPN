@@ -59,7 +59,6 @@ const AppRoutes = () => {
         <BrowserRouter>
             <Routes>
                 <Route path="/VPN/" element={<HomePage />} />
-
                 <Route
                     path="/VPN/login"
                     element={
@@ -68,7 +67,6 @@ const AppRoutes = () => {
                         </GuestRoute>
                     }
                 />
-
                 <Route
                 path="/VPN/register"
                 element={
@@ -77,7 +75,6 @@ const AppRoutes = () => {
                     </GuestRoute>
                 }
                 />
-
                 <Route
                     path="/VPN/account"
                     element={
@@ -86,7 +83,6 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 />
-
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>
         </BrowserRouter>

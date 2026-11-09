@@ -40,7 +40,6 @@ export const createReservation = async (req: Request, res: Response) => {
         const { plan, idempotencyKey } = validation.data
         const amount = SUBSCRIPTION_PRICES[plan]
 
-        // Проверяем, не создавался ли уже резерв с этим ключом.
         const existingReservation = await prisma.balanceReservation.findUnique({
             where: { idempotencyKey },
         })
@@ -211,7 +210,6 @@ export const confirmReservation = async (req: Request, res: Response) => {
                     return { type: 'NOT_FOUND' as const }
                 }
 
-                // Повторное подтверждение не должно списывать деньги снова.
                 if (reservation.status === 'CONFIRMED') {
                     return {
                         type: 'ALREADY_CONFIRMED' as const,
@@ -225,7 +223,6 @@ export const confirmReservation = async (req: Request, res: Response) => {
                     }
                 }
 
-                // Проверяем срок действия резервирования.
                 if (reservation.expiresAt <= new Date()) {
                     await tx.user.update({
                         where: { id: userId },
@@ -270,7 +267,6 @@ export const confirmReservation = async (req: Request, res: Response) => {
                     now.getTime() + durationDays * 24 * 60 * 60 * 1000,
                 )
 
-                // Окончательно списываем деньги и снимаем резерв.
                 await tx.user.update({
                     where: { id: userId },
                     data: {
@@ -283,7 +279,6 @@ export const confirmReservation = async (req: Request, res: Response) => {
                     },
                 })
 
-                // Создаём подписку.
                 const subscription = await tx.subscription.create({
                     data: {
                         userId,
@@ -294,7 +289,6 @@ export const confirmReservation = async (req: Request, res: Response) => {
                     },
                 })
 
-                // Отмечаем резервирование подтверждённым.
                 await tx.balanceReservation.update({
                     where: { id: reservation.id },
                     data: {
@@ -302,7 +296,6 @@ export const confirmReservation = async (req: Request, res: Response) => {
                     },
                 })
 
-                // Записываем операцию в историю баланса.
                 await tx.balanceTransaction.create({
                     data: {
                         userId,
@@ -518,7 +511,6 @@ export const cancelReservation = async (req: Request, res: Response) => {
                     }
                 }
 
-                // Меняем статус только если резервирование всё ещё PENDING.
                 const updatedReservation = await tx.balanceReservation.updateMany({
                     where: {
                         id: reservationId,
@@ -534,7 +526,6 @@ export const cancelReservation = async (req: Request, res: Response) => {
                     return { type: 'CONFLICT' as const }
                 }
 
-                // Размораживаем деньги. Защищаемся от отрицательного frozenBalance.
                 const updatedUser = await tx.user.updateMany({
                     where: {
                         id: userId,
