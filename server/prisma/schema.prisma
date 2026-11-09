@@ -27,6 +27,12 @@ enum ReservationStatus {
   EXPIRED
 }
 
+enum VpnKeyStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
 enum BalanceTransactionType {
   TOP_UP
   SUBSCRIPTION_PAYMENT
@@ -48,6 +54,7 @@ model User {
   frozenBalance Int @default(0)
 
   subscriptions       Subscription[]
+  vpnKeys             VpnKey[]
   reservations        BalanceReservation[]
   balanceTransactions BalanceTransaction[]
 
@@ -67,6 +74,7 @@ model Subscription {
   cancelledAt DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vpnKeys VpnKey[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -112,4 +120,25 @@ model BalanceTransaction {
 
   @@index([userId, createdAt])
   @@index([reservationId])
+}
+
+
+model VpnKey {
+  id             String       @id @default(uuid())
+  userId         String
+  subscriptionId String
+  key            String       @unique
+  status         VpnKeyStatus @default(ACTIVE)
+  expiresAt      DateTime
+  revokedAt      DateTime?
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([subscriptionId])
+  @@index([status, expiresAt])
 }

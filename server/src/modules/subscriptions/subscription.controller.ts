@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { Prisma } from '@prisma/client'
+import { randomBytes } from 'node:crypto'
 
 import prisma from '../../config/prisma.js'
 import {
@@ -13,6 +14,12 @@ import {
     RESERVATION_DURATION_MINUTES,
 } from './subscription.config.js'
 
+
+const generateVpnKey = () => {
+    const raw = randomBytes(10).toString('hex').toUpperCase()
+    const groups = raw.match(/.{1,4}/g) ?? []
+    return `RVPN-${groups.join('-')}`
+}
 
 export const createReservation = async (req: Request, res: Response) => {
     try {
@@ -289,6 +296,22 @@ export const confirmReservation = async (req: Request, res: Response) => {
                     },
                 })
 
+                const vpnKey = await tx.vpnKey.create({
+                    data: {
+                        userId,
+                        subscriptionId: subscription.id,
+                        key: generateVpnKey(),
+                        expiresAt,
+                    },
+                    select: {
+                        id: true,
+                        key: true,
+                        status: true,
+                        expiresAt: true,
+                        createdAt: true,
+                    },
+                })
+
                 await tx.balanceReservation.update({
                     where: { id: reservation.id },
                     data: {
@@ -309,6 +332,7 @@ export const confirmReservation = async (req: Request, res: Response) => {
                 return {
                     type: 'SUCCESS' as const,
                     subscription,
+                    vpnKey,
                     balance: user.balance - reservation.amount,
                     frozenBalance: user.frozenBalance - reservation.amount,
                 }
@@ -358,6 +382,7 @@ export const confirmReservation = async (req: Request, res: Response) => {
             message: 'Subscription activated successfully',
             data: {
                 subscription: result.subscription,
+                vpnKey: result.vpnKey,
                 balance: result.balance,
                 frozenBalance: result.frozenBalance,
                 availableBalance: result.balance - result.frozenBalance,
@@ -623,5 +648,98 @@ export const cancelReservation = async (req: Request, res: Response) => {
             success: false,
             message: 'Failed to cancel reservation',
         })
+    }
+}
+
+
+export const getVpnKeys = async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId
+        if (!userId) {
+            res.status(401).json({ success: false, message: 'Unauthorized' })
+            return
+        }
+
+        const now = new Date()
+        await prisma.vpnKey.updateMany({
+            where: { userId, status: 'ACTIVE', expiresAt: { lte: now } },
+            data: { status: 'EXPIRED' },
+        })
+
+        const keys = await prisma.vpnKey.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                key: true,
+                status: true,
+                expiresAt: true,
+                createdAt: true,
+                revokedAt: true,
+                subscription: { select: { plan: true, status: true } },
+            },
+        })
+
+        res.json({ success: true, data: { keys } })
+    } catch (error) {
+        console.error('Get VPN keys error:', error)
+        res.status(500).json({ success: false, message: 'Failed to get VPN keys' })
+    }
+}
+
+export const regenerateVpnKey = async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId
+        if (!userId) {
+            res.status(401).json({ success: false, message: 'Unauthorized' })
+            return
+        }
+
+        const { keyId } = req.params
+        if (!keyId || typeof keyId !== 'string') {
+            res.status(400).json({ success: false, message: 'Invalid key ID' })
+            return
+        }
+
+        const result = await prisma.$transaction(async (tx) => {
+            const currentKey = await tx.vpnKey.findFirst({
+                where: { id: keyId, userId },
+                include: { subscription: true },
+            })
+
+            if (!currentKey) return { type: 'NOT_FOUND' as const }
+            if (currentKey.status !== 'ACTIVE' || currentKey.expiresAt <= new Date() || currentKey.subscription.status !== 'ACTIVE' || currentKey.subscription.expiresAt <= new Date()) {
+                return { type: 'INACTIVE' as const }
+            }
+
+            await tx.vpnKey.update({
+                where: { id: currentKey.id },
+                data: { status: 'REVOKED', revokedAt: new Date() },
+            })
+
+            const newKey = await tx.vpnKey.create({
+                data: {
+                    userId,
+                    subscriptionId: currentKey.subscriptionId,
+                    key: generateVpnKey(),
+                    expiresAt: currentKey.subscription.expiresAt,
+                },
+                select: { id: true, key: true, status: true, expiresAt: true, createdAt: true },
+            })
+            return { type: 'SUCCESS' as const, key: newKey }
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+
+        if (result.type === 'NOT_FOUND') {
+            res.status(404).json({ success: false, message: 'VPN key not found' })
+            return
+        }
+        if (result.type === 'INACTIVE') {
+            res.status(409).json({ success: false, message: 'Only an active VPN key can be regenerated' })
+            return
+        }
+        res.json({ success: true, message: 'VPN key regenerated successfully', data: { key: result.key } })
+    } catch (error) {
+        console.error('Regenerate VPN key error:', error)
+        res.status(500).json({ success: false, message: 'Failed to regenerate VPN key' })
     }
 }

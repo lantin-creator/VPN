@@ -5,6 +5,8 @@ import {
     confirmReservation,
     getReservations,
     cancelReservation,
+    getVpnKeys,
+    regenerateVpnKey,
 } from './subscription.controller.js'
 
 const router = Router()
@@ -13,6 +15,8 @@ router.use(authMiddleware)
 router.post('/reservations', createReservation)
 router.post('/reservations/:reservationId/confirm', confirmReservation)
 router.get('/reservations', getReservations)
+router.get('/vpn-keys', getVpnKeys)
+router.post('/vpn-keys/:keyId/regenerate', regenerateVpnKey)
 router.post('/reservations/:reservationId/cancel', cancelReservation)
 
 export default router
