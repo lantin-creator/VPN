@@ -7,6 +7,7 @@ import {
     createReservationSchema,
     reservationIdSchema,
     reservationsQuerySchema,
+    subscriptionIdSchema,
 } from './subscription.schemas.js'
 import {
     SUBSCRIPTION_PRICES,
@@ -676,7 +677,15 @@ export const getVpnKeys = async (req: Request, res: Response) => {
                 expiresAt: true,
                 createdAt: true,
                 revokedAt: true,
-                subscription: { select: { plan: true, status: true } },
+                subscription: {
+                    select: {
+                        id: true,
+                        plan: true,
+                        status: true,
+                        createdAt: true,
+                        price: true,
+                    },
+                },
             },
         })
 
@@ -690,56 +699,348 @@ export const getVpnKeys = async (req: Request, res: Response) => {
 export const regenerateVpnKey = async (req: Request, res: Response) => {
     try {
         const userId = req.userId
+
         if (!userId) {
-            res.status(401).json({ success: false, message: 'Unauthorized' })
+            res.status(401).json({
+                success: false,
+                message: 'Unauthorized',
+            })
             return
         }
 
         const { keyId } = req.params
+
         if (!keyId || typeof keyId !== 'string') {
-            res.status(400).json({ success: false, message: 'Invalid key ID' })
+            res.status(400).json({
+                success: false,
+                message: 'Invalid key ID',
+            })
             return
         }
 
-        const result = await prisma.$transaction(async (tx) => {
-            const currentKey = await tx.vpnKey.findFirst({
-                where: { id: keyId, userId },
-                include: { subscription: true },
-            })
+        const now = new Date()
 
-            if (!currentKey) return { type: 'NOT_FOUND' as const }
-            if (currentKey.status !== 'ACTIVE' || currentKey.expiresAt <= new Date() || currentKey.subscription.status !== 'ACTIVE' || currentKey.subscription.expiresAt <= new Date()) {
-                return { type: 'INACTIVE' as const }
-            }
+        const monthStart = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            1,
+        ))
 
-            await tx.vpnKey.update({
-                where: { id: currentKey.id },
-                data: { status: 'REVOKED', revokedAt: new Date() },
-            })
+        const nextMonthStart = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth() + 1,
+            1,
+        ))
 
-            const newKey = await tx.vpnKey.create({
-                data: {
-                    userId,
-                    subscriptionId: currentKey.subscriptionId,
-                    key: generateVpnKey(),
-                    expiresAt: currentKey.subscription.expiresAt,
-                },
-                select: { id: true, key: true, status: true, expiresAt: true, createdAt: true },
-            })
-            return { type: 'SUCCESS' as const, key: newKey }
-        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+        const LIMIT = 2
+
+        const result = await prisma.$transaction(
+            async (tx) => {
+                const initialKey = await tx.vpnKey.findFirst({
+                    where: {
+                        id: keyId,
+                        userId,
+                    },
+                    select: {
+                        id: true,
+                        subscriptionId: true,
+                    },
+                })
+
+                if (!initialKey) {
+                    return { type: 'NOT_FOUND' as const }
+                }
+
+                await tx.$queryRaw`
+                    SELECT id
+                    FROM "Subscription"
+                    WHERE id = ${initialKey.subscriptionId}
+                    FOR UPDATE
+                `
+
+                const currentKey = await tx.vpnKey.findFirst({
+                    where: {
+                        id: keyId,
+                        userId,
+                    },
+                    include: {
+                        subscription: true,
+                    },
+                })
+
+                if (!currentKey) {
+                    return { type: 'NOT_FOUND' as const }
+                }
+
+                const currentTime = new Date()
+
+                if (
+                    currentKey.status !== 'ACTIVE' ||
+                    currentKey.expiresAt <= currentTime ||
+                    currentKey.subscription.status !== 'ACTIVE' ||
+                    currentKey.subscription.expiresAt <= currentTime
+                ) {
+                    return { type: 'INACTIVE' as const }
+                }
+
+                const regenerationsCount =
+                    await tx.vpnKeyRegeneration.count({
+                        where: {
+                            subscriptionId: currentKey.subscriptionId,
+                            createdAt: {
+                                gte: monthStart,
+                                lt: nextMonthStart,
+                            },
+                        },
+                    })
+
+                if (regenerationsCount >= LIMIT) {
+                    return {
+                        type: 'LIMIT_REACHED' as const,
+                        used: regenerationsCount,
+                        remaining: 0,
+                        resetsAt: nextMonthStart,
+                    }
+                }
+
+                await tx.vpnKey.update({
+                    where: {
+                        id: currentKey.id,
+                    },
+                    data: {
+                        status: 'REVOKED',
+                        revokedAt: currentTime,
+                    },
+                })
+
+                const newKey = await tx.vpnKey.create({
+                    data: {
+                        userId,
+                        subscriptionId: currentKey.subscriptionId,
+                        key: generateVpnKey(),
+                        expiresAt: currentKey.subscription.expiresAt,
+                    },
+                    select: {
+                        id: true,
+                        key: true,
+                        status: true,
+                        expiresAt: true,
+                        createdAt: true,
+                    },
+                })
+
+                await tx.vpnKeyRegeneration.create({
+                    data: {
+                        subscriptionId: currentKey.subscriptionId,
+                    },
+                })
+
+                return {
+                    type: 'SUCCESS' as const,
+                    key: newKey,
+                    used: regenerationsCount + 1,
+                    remaining: LIMIT - regenerationsCount - 1,
+                    resetsAt: nextMonthStart,
+                }
+            },
+        )
 
         if (result.type === 'NOT_FOUND') {
-            res.status(404).json({ success: false, message: 'VPN key not found' })
+            res.status(404).json({
+                success: false,
+                message: 'VPN key not found',
+            })
             return
         }
+
         if (result.type === 'INACTIVE') {
-            res.status(409).json({ success: false, message: 'Only an active VPN key can be regenerated' })
+            res.status(409).json({
+                success: false,
+                message: 'Only an active VPN key can be regenerated',
+            })
             return
         }
-        res.json({ success: true, message: 'VPN key regenerated successfully', data: { key: result.key } })
+
+        if (result.type === 'LIMIT_REACHED') {
+            res.status(429).json({
+                success: false,
+                message: 'Monthly VPN key regeneration limit reached',
+                data: {
+                    limit: LIMIT,
+                    used: result.used,
+                    remaining: result.remaining,
+                    resetsAt: result.resetsAt,
+                },
+            })
+            return
+        }
+
+        res.json({
+            success: true,
+            message: 'VPN key regenerated successfully',
+            data: {
+                key: result.key,
+                regenerationLimit: {
+                    limit: LIMIT,
+                    used: result.used,
+                    remaining: result.remaining,
+                    resetsAt: result.resetsAt,
+                },
+            },
+        })
     } catch (error) {
         console.error('Regenerate VPN key error:', error)
-        res.status(500).json({ success: false, message: 'Failed to regenerate VPN key' })
+
+        res.status(500).json({
+            success: false,
+            message: 'Failed to regenerate VPN key',
+        })
     }
 }
+
+export const refundSubscription = async (
+  req: Request,
+  res: Response
+) => {
+try {
+const userId = req.userId;
+const params = subscriptionIdSchema.safeParse(req.params);
+
+if (!params.success) {
+    return res.status(400).json({
+        success: false,
+        message: 'Некорректный ID подписки',
+    });
+}
+
+const { subscriptionId } = params.data;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Необходима авторизация',
+      });
+    }
+
+    if (!subscriptionId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Не указан ID подписки',
+      });
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`
+        SELECT id
+        FROM "Subscription"
+        WHERE id = ${subscriptionId}
+        FOR UPDATE
+      `;
+
+      const subscription = await tx.subscription.findFirst({
+        where: {
+          id: subscriptionId,
+          userId,
+        },
+      });
+
+      if (!subscription) {
+        return {
+          error: 'SUBSCRIPTION_NOT_FOUND',
+        };
+      }
+
+      if (subscription.status !== 'ACTIVE') {
+        return {
+          error: 'SUBSCRIPTION_NOT_ACTIVE',
+        };
+      }
+
+      const now = new Date();
+      const REFUND_PERIOD_MS = 24 * 60 * 60 * 1000;
+
+      const elapsedTime =
+        now.getTime() - subscription.createdAt.getTime();
+console.log('TIME DEBUG:', {
+  nodeNow: new Date().toISOString(),
+  nodeLocal: new Date().toString(),
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+});
+        
+      if (elapsedTime < 0 || elapsedTime > REFUND_PERIOD_MS) {
+        return {
+          error: 'REFUND_PERIOD_EXPIRED',
+        };
+      }
+
+      const refundAmount = subscription.price;
+
+      await tx.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          balance: {
+            increment: refundAmount,
+          },
+        },
+      });
+
+      await tx.balanceTransaction.create({
+        data: {
+          userId,
+          type: 'REFUND',
+          amount: refundAmount,
+          description: `Возврат средств за подписку ${subscription.plan}`,
+        },
+      });
+
+      await tx.subscription.delete({
+        where: {
+          id: subscription.id,
+        },
+      });
+
+      return {
+        success: true,
+        refundAmount,
+      };
+    });
+
+    if ('error' in result) {
+      switch (result.error) {
+        case 'SUBSCRIPTION_NOT_FOUND':
+          return res.status(404).json({
+            success: false,
+            message: 'Подписка не найдена',
+          });
+
+        case 'SUBSCRIPTION_NOT_ACTIVE':
+          return res.status(400).json({
+            success: false,
+            message: 'Вернуть можно только активную подписку',
+          });
+
+        case 'REFUND_PERIOD_EXPIRED':
+          return res.status(403).json({
+            success: false,
+            message: 'Срок возврата истёк. Возврат доступен в течение 24 часов после покупки',
+          });
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Подписка отменена, средства возвращены на баланс',
+      data: {
+        refundAmount: result.refundAmount,
+      },
+    });
+  } catch (error) {
+    console.error('Refund subscription error:', error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Не удалось выполнить возврат средств',
+    });
+  }
+};

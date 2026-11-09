@@ -306,6 +306,62 @@
     box-sizing: border-box;
 }
 
+/* Блок возврата подписки */
+
+.account-refund {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.045);
+}
+
+.account-refund-info {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary, #a1a1aa);
+}
+
+.account-refund-info strong {
+    color: var(--text-primary, #fff);
+}
+
+.account-refund-button {
+    width: 100%;
+    padding: 11px 16px;
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.account-refund-button:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.75);
+}
+
+.account-refund-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.account-refund-hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary, #a1a1aa);
+}
+
 @media (max-width: 800px) {
     .account-layout {
         grid-template-columns: 1fr;

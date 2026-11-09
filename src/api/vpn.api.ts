@@ -3,16 +3,19 @@ import { apiRequest } from './client'
 export type VpnKeyStatus = 'ACTIVE' | 'EXPIRED' | 'REVOKED'
 
 export interface VpnKey {
+  id: string
+  key: string
+  status: VpnKeyStatus
+  expiresAt: string
+  createdAt: string
+  revokedAt?: string | null
+  subscription?: {
     id: string
-    key: string
-    status: VpnKeyStatus
-    expiresAt: string
+    plan: 'MONTH' | 'QUARTER' | 'YEAR'
+    status: 'ACTIVE' | 'EXPIRED' | 'CANCELLED'
     createdAt: string
-    revokedAt?: string | null
-    subscription?: {
-        plan: 'MONTH' | 'QUARTER' | 'YEAR'
-        status: 'ACTIVE' | 'EXPIRED' | 'CANCELLED'
-    }
+    price: number
+  }
 }
 
 interface VpnKeysResponse {

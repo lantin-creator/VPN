@@ -65,3 +65,25 @@ export const confirmReservationRequest = (
     },
   )
 }
+
+export interface RefundSubscriptionResponse {
+  success: boolean
+  message: string
+  data: {
+    refundAmount: number
+  }
+}
+
+export const refundSubscriptionRequest = (
+  subscriptionId: string,
+  token: string,
+) => {
+  return apiRequest<RefundSubscriptionResponse>(
+    `/subscriptions/${subscriptionId}/refund`,
+    {
+      method: 'POST',
+      token,
+    },
+  )
+}
+

@@ -73,8 +73,9 @@ model Subscription {
   expiresAt   DateTime
   cancelledAt DateTime?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vpnKeys VpnKey[]
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vpnKeys             VpnKey[]
+  vpnKeyRegenerations VpnKeyRegeneration[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -90,7 +91,7 @@ model BalanceReservation {
   plan           SubscriptionPlan
   idempotencyKey String           @unique
 
-  status ReservationStatus @default(PENDING)
+  status    ReservationStatus @default(PENDING)
   expiresAt DateTime
 
   user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -103,9 +104,9 @@ model BalanceReservation {
 }
 
 model BalanceTransaction {
-  id            String  @id @default(uuid())
-  userId        String
-  reservationId String?
+  id             String  @id @default(uuid())
+  userId         String
+  reservationId  String?
   idempotencyKey String? @unique
 
   type        BalanceTransactionType
@@ -121,7 +122,6 @@ model BalanceTransaction {
   @@index([userId, createdAt])
   @@index([reservationId])
 }
-
 
 model VpnKey {
   id             String       @id @default(uuid())
@@ -141,4 +141,14 @@ model VpnKey {
   @@index([userId, status])
   @@index([subscriptionId])
   @@index([status, expiresAt])
+}
+
+model VpnKeyRegeneration {
+  id             String   @id @default(uuid())
+  subscriptionId String
+  createdAt      DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, createdAt])
 }

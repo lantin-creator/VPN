@@ -1,15 +1,19 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import './Auth.css'
 import { Link } from 'react-router-dom'
+
+import './Auth.css'
+
 import BalanceModal from '../../components/BalanceModal'
 import { useBalanceContext } from '../../context/BalanceContext'
 import { useAuth } from '../../context/AuthContext'
+
 import {
     getVpnKeys,
     regenerateVpnKey,
     type VpnKey,
 } from '../../api/vpn.api'
 
+import { refundSubscriptionRequest } from '../../api/subscriptions.api'
 
 export type AccountProfile = {
     email: string
@@ -20,15 +24,17 @@ export type AccountProfile = {
     phone: string | null
 }
 
-
 type AccountPanelProps = {
     profile: AccountProfile
-    onSave: (profile: Omit<AccountProfile, 'email'>) => void | Promise<void>
+    onSave: (
+        profile: Omit<AccountProfile, 'email'>,
+    ) => void | Promise<void>
     onLogout: () => void
     isLoading?: boolean
     error?: string | null
 }
 
+const REFUND_PERIOD_MS = 24 * 60 * 60 * 1000
 
 const formatMoney = (amount: number) =>
     `${(amount / 100).toLocaleString('ru-RU', {
@@ -36,6 +42,16 @@ const formatMoney = (amount: number) =>
         maximumFractionDigits: 2,
     })} ₽`
 
+const isRefundAvailable = (createdAt: string) => {
+    const purchaseTime = new Date(createdAt).getTime()
+    const elapsedTime = Date.now() - purchaseTime
+
+    return (
+        Number.isFinite(purchaseTime) &&
+        elapsedTime >= 0 &&
+        elapsedTime <= REFUND_PERIOD_MS
+    )
+}
 
 const AccountPanel = ({
     profile,
@@ -49,14 +65,23 @@ const AccountPanel = ({
     const [vpnKeys, setVpnKeys] = useState<VpnKey[]>([])
     const [vpnKeysLoading, setVpnKeysLoading] = useState(true)
     const [vpnKeysError, setVpnKeysError] = useState<string | null>(null)
-    const [regeneratingKeyId, setRegeneratingKeyId] = useState<string | null>(null)
+
+    const [regeneratingKeyId, setRegeneratingKeyId] =
+        useState<string | null>(null)
+
     const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null)
+
+    const [refundingSubscriptionId, setRefundingSubscriptionId] =
+        useState<string | null>(null)
+
+    const [refundError, setRefundError] = useState<string | null>(null)
 
     const {
         balance,
         isLoading: isBalanceLoading,
         error: balanceError,
         topUp,
+        refreshBalance,
     } = useBalanceContext()
 
     const [firstName, setFirstName] = useState(profile.firstName ?? '')
@@ -69,9 +94,9 @@ const AccountPanel = ({
 
     const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false)
 
-
     useEffect(() => {
         if (!token) {
+            setVpnKeys([])
             setVpnKeysLoading(false)
             return
         }
@@ -107,7 +132,6 @@ const AccountPanel = ({
         }
     }, [token])
 
-
     const handleRegenerateKey = async (keyId: string) => {
         if (!token) return
 
@@ -130,6 +154,38 @@ const AccountPanel = ({
         }
     }
 
+    const handleRefund = async (subscriptionId: string) => {
+        if (!token) return
+
+        const confirmed = window.confirm(
+            'Вернуть средства за эту подписку на баланс? Все VPN-ключи этой подписки будут удалены. Это действие нельзя отменить.',
+        )
+
+        if (!confirmed) return
+
+        setRefundingSubscriptionId(subscriptionId)
+        setRefundError(null)
+
+        try {
+            await refundSubscriptionRequest(subscriptionId, token)
+
+            setVpnKeys((currentKeys) =>
+                currentKeys.filter(
+                    (key) => key.subscription?.id !== subscriptionId,
+                ),
+            )
+
+            await refreshBalance()
+        } catch (requestError) {
+            setRefundError(
+                requestError instanceof Error
+                    ? requestError.message
+                    : 'Не удалось оформить возврат',
+            )
+        } finally {
+            setRefundingSubscriptionId(null)
+        }
+    }
 
     const handleCopyKey = async (key: VpnKey) => {
         try {
@@ -141,12 +197,9 @@ const AccountPanel = ({
                 setCopiedKeyId(null)
             }, 1800)
         } catch {
-            setVpnKeysError(
-                'Не удалось скопировать ключ',
-            )
+            setVpnKeysError('Не удалось скопировать ключ')
         }
     }
-
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -160,11 +213,9 @@ const AccountPanel = ({
         })
     }
 
-
     const handleTopUp = async (amount: number) => {
         await topUp(amount)
     }
-
 
     return (
         <main className="account-page">
@@ -179,6 +230,7 @@ const AccountPanel = ({
 
                         <h1>Личный кабинет</h1>
                     </div>
+
                     <button
                         className="account-secondary"
                         type="button"
@@ -194,12 +246,14 @@ const AccountPanel = ({
                             <p className="account-balance-caption">
                                 Ваш баланс
                             </p>
+
                             <h2>
                                 {isBalanceLoading
                                     ? 'Загрузка…'
                                     : formatMoney(balance)}
                             </h2>
                         </div>
+
                         <button
                             className="account-topup-button"
                             type="button"
@@ -209,6 +263,7 @@ const AccountPanel = ({
                             Пополнить
                         </button>
                     </div>
+
                     {balanceError && (
                         <p className="auth-error" role="alert">
                             {balanceError}
@@ -235,6 +290,7 @@ const AccountPanel = ({
                                         readOnly
                                     />
                                 </label>
+
                                 <div className="account-grid">
                                     <label className="auth-field">
                                         Имя
@@ -243,11 +299,14 @@ const AccountPanel = ({
                                             className="auth-input"
                                             value={firstName}
                                             onChange={(event) =>
-                                                setFirstName(event.target.value)
+                                                setFirstName(
+                                                    event.target.value,
+                                                )
                                             }
                                             maxLength={50}
                                         />
                                     </label>
+
                                     <label className="auth-field">
                                         Фамилия
 
@@ -255,11 +314,14 @@ const AccountPanel = ({
                                             className="auth-input"
                                             value={lastName}
                                             onChange={(event) =>
-                                                setLastName(event.target.value)
+                                                setLastName(
+                                                    event.target.value,
+                                                )
                                             }
                                             maxLength={50}
                                         />
                                     </label>
+
                                     <label className="auth-field">
                                         Дата рождения
 
@@ -268,10 +330,13 @@ const AccountPanel = ({
                                             type="date"
                                             value={birthDate}
                                             onChange={(event) =>
-                                                setBirthDate(event.target.value)
+                                                setBirthDate(
+                                                    event.target.value,
+                                                )
                                             }
                                         />
                                     </label>
+
                                     <label className="auth-field">
                                         Город
 
@@ -284,6 +349,7 @@ const AccountPanel = ({
                                             maxLength={100}
                                         />
                                     </label>
+
                                     <label className="auth-field">
                                         Телефон
 
@@ -298,11 +364,13 @@ const AccountPanel = ({
                                         />
                                     </label>
                                 </div>
+
                                 {error && (
                                     <p className="auth-error" role="alert">
                                         {error}
                                     </p>
                                 )}
+
                                 <div className="account-actions">
                                     <button
                                         className="auth-submit"
@@ -317,21 +385,30 @@ const AccountPanel = ({
                             </form>
                         </section>
                     </div>
+
                     <div className="account-subscription-column">
                         <section className="account-card">
                             <h2>Мой VPN</h2>
+
                             <p>
                                 Демонстрационный ключ аккаунта RVPN.
                                 Он не подключает к реальному VPN-серверу.
                             </p>
-                            {vpnKeysLoading && (
-                                <p>Загружаем ключи…</p>
-                            )}
+
+                            {vpnKeysLoading && <p>Загружаем ключи…</p>}
+
                             {vpnKeysError && (
                                 <p className="auth-error" role="alert">
                                     {vpnKeysError}
                                 </p>
                             )}
+
+                            {refundError && (
+                                <p className="auth-error" role="alert">
+                                    {refundError}
+                                </p>
+                            )}
+
                             {!vpnKeysLoading &&
                                 vpnKeys.length === 0 &&
                                 !vpnKeysError && (
@@ -340,61 +417,128 @@ const AccountPanel = ({
                                         и ключ появится здесь.
                                     </p>
                                 )}
-                            {vpnKeys.map((vpnKey) => (
-                                <div
-                                    className="account-vpn-key"
-                                    key={vpnKey.id}
-                                >
-                                    <p>
-                                        <strong>
-                                            {vpnKey.status === 'ACTIVE'
-                                                ? 'Активен'
-                                                : vpnKey.status === 'EXPIRED'
-                                                    ? 'Истёк'
-                                                    : 'Отозван'}
-                                        </strong>
-                                    </p>
-                                    <code>{vpnKey.key}</code>
-                                    <p>
-                                        Действует до:{' '}
-                                        {new Date(
-                                            vpnKey.expiresAt,
-                                        ).toLocaleString('ru-RU')}
-                                    </p>
-                                    {vpnKey.status === 'ACTIVE' && (
-                                        <div className="account-actions">
-                                            <button
-                                                className="account-secondary"
-                                                type="button"
-                                                onClick={() =>
-                                                    void handleCopyKey(vpnKey)
-                                                }
-                                            >
-                                                {copiedKeyId === vpnKey.id
-                                                    ? 'Скопировано'
-                                                    : 'Копировать ключ'}
-                                            </button>
 
-                                            <button
-                                                className="account-secondary"
-                                                type="button"
-                                                disabled={
-                                                    regeneratingKeyId === vpnKey.id
-                                                }
-                                                onClick={() =>
-                                                    void handleRegenerateKey(
-                                                        vpnKey.id,
-                                                    )
-                                                }
-                                            >
-                                                {regeneratingKeyId === vpnKey.id
-                                                    ? 'Перевыпускаем…'
-                                                    : 'Перевыпустить'}
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                            {vpnKeys.map((vpnKey, index) => {
+                                const subscription = vpnKey.subscription
+
+                                const isFirstKeyOfSubscription =
+                                    !!subscription?.id &&
+                                    vpnKeys.findIndex(
+                                        (key) =>
+                                            key.subscription?.id ===
+                                            subscription.id,
+                                    ) === index
+
+                                const canRefund =
+                                    isFirstKeyOfSubscription &&
+                                    subscription?.status === 'ACTIVE' &&
+                                    !!subscription.createdAt &&
+                                    isRefundAvailable(
+                                        subscription.createdAt,
+                                    )
+
+                                return (
+                                    <div
+                                        className="account-vpn-key"
+                                        key={vpnKey.id}
+                                    >
+                                        <p>
+                                            <strong>
+                                                {vpnKey.status === 'ACTIVE'
+                                                    ? 'Активен'
+                                                    : vpnKey.status ===
+                                                        'EXPIRED'
+                                                      ? 'Истёк'
+                                                      : 'Отозван'}
+                                            </strong>
+                                        </p>
+
+                                        <code>{vpnKey.key}</code>
+
+                                        <p>
+                                            Действует до:{' '}
+                                            {new Date(
+                                                vpnKey.expiresAt,
+                                            ).toLocaleString('ru-RU')}
+                                        </p>
+
+                                        {vpnKey.status === 'ACTIVE' && (
+                                            <div className="account-actions">
+                                                <button
+                                                    className="account-secondary"
+                                                    type="button"
+                                                    onClick={() =>
+                                                        void handleCopyKey(
+                                                            vpnKey,
+                                                        )
+                                                    }
+                                                >
+                                                    {copiedKeyId ===
+                                                    vpnKey.id
+                                                        ? 'Скопировано'
+                                                        : 'Копировать ключ'}
+                                                </button>
+
+                                                <button
+                                                    className="account-secondary"
+                                                    type="button"
+                                                    disabled={
+                                                        regeneratingKeyId ===
+                                                        vpnKey.id
+                                                    }
+                                                    onClick={() =>
+                                                        void handleRegenerateKey(
+                                                            vpnKey.id,
+                                                        )
+                                                    }
+                                                >
+                                                    {regeneratingKeyId ===
+                                                    vpnKey.id
+                                                        ? 'Перевыпускаем…'
+                                                        : 'Перевыпустить'}
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {canRefund && subscription && (
+                                            <div className="account-refund">
+                                                <p className="account-refund-info">
+                                                    Стоимость подписки:{' '}
+                                                    <strong>
+                                                        {formatMoney(
+                                                            subscription.price,
+                                                        )}
+                                                    </strong>
+                                                </p>
+
+                                                <button
+                                                    className="account-refund-button"
+                                                    type="button"
+                                                    disabled={
+                                                        refundingSubscriptionId ===
+                                                        subscription.id
+                                                    }
+                                                    onClick={() =>
+                                                        void handleRefund(
+                                                            subscription.id,
+                                                        )
+                                                    }
+                                                >
+                                                    {refundingSubscriptionId ===
+                                                    subscription.id
+                                                        ? 'Оформляем возврат…'
+                                                        : 'Вернуть средства'}
+                                                </button>
+
+                                                <p className="account-refund-hint">
+                                                    Возврат доступен в течение
+                                                    24 часов после покупки.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
                         </section>
                     </div>
                 </div>
@@ -408,6 +552,5 @@ const AccountPanel = ({
         </main>
     )
 }
-
 
 export default AccountPanel
