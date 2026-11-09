@@ -32,8 +32,6 @@ interface ConfirmReservationResponse {
       expiresAt: string
     }
     balance?: number
-    frozenBalance?: number
-    availableBalance?: number
     alreadyProcessed: boolean
   }
 }

@@ -2,8 +2,6 @@ import { apiRequest } from './client'
 
 export type BalanceData = {
     balance: number
-    frozenBalance: number
-    availableBalance: number
 }
 
 export type BalanceResponse = {

@@ -36,8 +36,6 @@ const AccountPanel = ({
 }: AccountPanelProps) => {
     const {
         balance,
-        frozen,
-        available,
         isLoading: isBalanceLoading,
         error: balanceError,
         topUp,
@@ -112,22 +110,6 @@ const AccountPanel = ({
                         >
                             Пополнить
                         </button>
-                    </div>
-
-                    <div className="account-balance-details">
-                        <div>
-                            <span>Доступно</span>
-                            <strong>
-                                {isBalanceLoading ? '—' : formatMoney(available)}
-                            </strong>
-                        </div>
-
-                        <div>
-                            <span>Заморожено</span>
-                            <strong>
-                                {isBalanceLoading ? '—' : formatMoney(frozen)}
-                            </strong>
-                        </div>
                     </div>
 
                     {balanceError && (

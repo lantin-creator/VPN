@@ -269,31 +269,6 @@
     cursor: not-allowed;
 }
 
-.account-balance-details {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(148, 163, 184, 0.16);
-}
-
-.account-balance-details div {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.account-balance-details span {
-    color: #94a3b8;
-    font-size: 13px;
-}
-
-.account-balance-details strong {
-    color: #e2e8f0;
-    font-size: 17px;
-    font-weight: 600;
-}
 .auth-home-link {
     display: inline-flex;
     align-items: center;

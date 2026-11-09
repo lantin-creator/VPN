@@ -18,6 +18,7 @@ type AuthContextValue = {
     user: User | null
     token: string | null
     isLoading: boolean
+    isAuthUnavailable: boolean
     login: (email: string, password: string) => Promise<void>
     register: (email: string, password: string) => Promise<void>
     logout: () => void
@@ -32,6 +33,18 @@ type AuthProviderProps = {
     children: ReactNode
 }
 
+const getErrorStatus = (error: unknown): number | undefined => {
+    if (
+        typeof error === 'object' &&
+        error !== null &&
+        'status' in error
+    ) {
+        return (error as { status?: number }).status
+    }
+
+    return undefined
+}
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [token, setToken] = useState<string | null>(
         () => localStorage.getItem(TOKEN_KEY),
@@ -39,27 +52,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const [user, setUser] = useState<User | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [isAuthUnavailable, setIsAuthUnavailable] = useState(false)
 
     const logout = useCallback(() => {
         localStorage.removeItem(TOKEN_KEY)
         setToken(null)
         setUser(null)
+        setIsAuthUnavailable(false)
     }, [])
 
     const refreshUser = useCallback(async () => {
         if (!token) {
             setUser(null)
+            setIsAuthUnavailable(false)
             return
         }
 
         try {
             const response = await getCurrentUser(token)
+
             setUser(response.user)
+            setIsAuthUnavailable(false)
         } catch (error) {
-            const status = (error as { status?: number }).status
+            const status = getErrorStatus(error)
 
             if (status === 401 || status === 403) {
                 logout()
+            } else {
+                setIsAuthUnavailable(true)
             }
 
             throw error
@@ -72,19 +92,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const initializeAuth = async () => {
             if (!token) {
                 setUser(null)
+                setIsAuthUnavailable(false)
                 setIsLoading(false)
                 return
             }
+
+            setIsLoading(true)
 
             try {
                 const response = await getCurrentUser(token)
 
                 if (!cancelled) {
                     setUser(response.user)
+                    setIsAuthUnavailable(false)
                 }
-            } catch {
+            } catch (error) {
                 if (!cancelled) {
-                    logout()
+                    const status = getErrorStatus(error)
+
+                    if (status === 401 || status === 403) {
+                        logout()
+                    } else {
+                        setIsAuthUnavailable(true)
+                    }
                 }
             } finally {
                 if (!cancelled) {
@@ -93,28 +123,41 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             }
         }
 
-        setIsLoading(true)
+        const handleOnline = () => {
+            if (token) {
+                void refreshUser().catch(() => {
+                })
+            }
+        }
+
         void initializeAuth()
+
+        window.addEventListener('online', handleOnline)
 
         return () => {
             cancelled = true
+            window.removeEventListener('online', handleOnline)
         }
-    }, [token, logout])
+    }, [token, logout, refreshUser])
 
     const login = async (email: string, password: string) => {
         const response = await loginRequest(email, password)
 
         localStorage.setItem(TOKEN_KEY, response.token)
-        setToken(response.token)
+
         setUser(response.user)
+        setIsAuthUnavailable(false)
+        setToken(response.token)
     }
 
     const register = async (email: string, password: string) => {
         const response = await registerRequest(email, password)
 
         localStorage.setItem(TOKEN_KEY, response.token)
-        setToken(response.token)
+
         setUser(response.user)
+        setIsAuthUnavailable(false)
+        setToken(response.token)
     }
 
     return (
@@ -123,6 +166,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 user,
                 token,
                 isLoading,
+                isAuthUnavailable,
                 login,
                 register,
                 logout,

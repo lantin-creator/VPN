@@ -11,13 +11,10 @@ import { useAuth } from './AuthContext'
 import {
     getBalance,
     topUpBalance,
-    type BalanceData,
 } from '../api/balance.api'
 
 interface BalanceContextValue {
     balance: number
-    frozen: number
-    available: number
     isLoading: boolean
     error: string | null
     refreshBalance: () => Promise<void>
@@ -31,22 +28,13 @@ const BalanceContext = createContext<BalanceContextValue | undefined>(
 export const BalanceProvider = ({ children }: { children: ReactNode }) => {
     const { token, user, isLoading: isAuthLoading } = useAuth()
 
-    const [balanceData, setBalanceData] = useState<BalanceData>({
-        balance: 0,
-        frozenBalance: 0,
-        availableBalance: 0,
-    })
-
+    const [balance, setBalance] = useState(0)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
     const refreshBalance = useCallback(async () => {
         if (!token || !user) {
-            setBalanceData({
-                balance: 0,
-                frozenBalance: 0,
-                availableBalance: 0,
-            })
+            setBalance(0)
             return
         }
 
@@ -54,7 +42,7 @@ export const BalanceProvider = ({ children }: { children: ReactNode }) => {
             setError(null)
 
             const response = await getBalance(token)
-            setBalanceData(response.data)
+            setBalance(response.data.balance)
         } catch (err) {
             const message =
                 err instanceof Error
@@ -76,18 +64,14 @@ export const BalanceProvider = ({ children }: { children: ReactNode }) => {
 
             try {
                 if (!token || !user) {
-                    setBalanceData({
-                        balance: 0,
-                        frozenBalance: 0,
-                        availableBalance: 0,
-                    })
+                    setBalance(0)
                     return
                 }
 
                 const response = await getBalance(token)
 
                 if (!cancelled) {
-                    setBalanceData(response.data)
+                    setBalance(response.data.balance)
                     setError(null)
                 }
             } catch (err) {
@@ -138,9 +122,7 @@ export const BalanceProvider = ({ children }: { children: ReactNode }) => {
     return (
         <BalanceContext.Provider
             value={{
-                balance: balanceData.balance,
-                frozen: balanceData.frozenBalance,
-                available: balanceData.availableBalance,
+                balance,
                 isLoading,
                 error,
                 refreshBalance,

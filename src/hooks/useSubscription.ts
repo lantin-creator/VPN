@@ -63,7 +63,6 @@ export const useSubscription = () => {
     setToast(null)
 
     try {
-      // 1. Создаём резервирование и замораживаем деньги на backend.
       const reservationResponse = await createReservationRequest(
         PLAN_MAP[selectedPlan.id],
         token,
@@ -71,22 +70,17 @@ export const useSubscription = () => {
 
       const reservationId = reservationResponse.data.reservation.id
 
-      // 2. Подтверждаем резервирование.
       await confirmReservationRequest(reservationId, token)
 
-      // 3. Получаем актуальный баланс с backend.
       await refreshBalance()
 
       setIsModalOpen(false)
       setSelectedPlan(null)
       setToast('Подписка успешно оформлена!')
     } catch (error) {
-      // Даже при ошибке обновляем баланс: сервер мог успеть
-      // обработать запрос до возникновения сетевой ошибки.
       try {
         await refreshBalance()
       } catch {
-        // Ошибка обновления баланса не должна скрывать основную ошибку.
       }
 
       setToast(
