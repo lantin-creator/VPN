@@ -960,11 +960,6 @@ const { subscriptionId } = params.data;
 
       const elapsedTime =
         now.getTime() - subscription.createdAt.getTime();
-console.log('TIME DEBUG:', {
-  nodeNow: new Date().toISOString(),
-  nodeLocal: new Date().toString(),
-  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-});
         
       if (elapsedTime < 0 || elapsedTime > REFUND_PERIOD_MS) {
         return {
