@@ -11,7 +11,7 @@
 
 .modal {
   position: relative;
-  background: #fff;
+  background: var(--page-bg);
   color: #111;
   border-radius: 16px;
   padding: 32px 28px 28px;
@@ -32,9 +32,9 @@
   font-size: 28px;
   line-height: 1;
   cursor: pointer;
-  color: #888;
+  color: var(--modal-close);
 }
-.modal-close:hover { color: #000; }
+.modal-close:hover { color: var(--modal-close-hover); }
 
 .modal-title {
   margin: 0 0 8px;
@@ -45,7 +45,7 @@
 .modal-plan {
   margin: 0 0 20px;
   font-size: 16px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .modal-form {

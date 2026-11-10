@@ -16,6 +16,7 @@ import AccountPage from './pages/AccountPage'
 
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { BalanceProvider } from './context/BalanceContext'
+import { ThemeProvider } from './context/ThemeContext'
 
 const GuestRoute = ({ children }: { children: ReactNode }) => {
     const { user, isLoading } = useAuth()
@@ -91,11 +92,13 @@ const AppRoutes = () => {
 
 const App = () => {
     return (
-        <AuthProvider>
-            <BalanceProvider>
-                <AppRoutes />
-            </BalanceProvider>
-        </AuthProvider>
+        <ThemeProvider>
+            <AuthProvider>
+                <BalanceProvider>
+                    <AppRoutes />
+                </BalanceProvider>
+            </AuthProvider>
+        </ThemeProvider>
     )
 }
 

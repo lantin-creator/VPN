@@ -143,10 +143,8 @@
     min-height: 100vh;
     padding: 50px 20px;
     box-sizing: border-box;
-    background:
-        radial-gradient(ellipse at top left, rgba(40, 115, 210, 0.15), transparent 45%),
-        linear-gradient(135deg, #07111f 0%, #101d30 55%, #0a1423 100%);
-    color: #f1f5f9;
+    background: var(--page-gradient);
+    color: var(--text-primary);
     font-family: inherit;
 }
 
@@ -168,21 +166,16 @@
     margin-bottom: 10px;
 }
 
-.account-header h1 {
-    margin: 0;
-    color: #f8fafc;
-    font-size: 30px;
+.account-header h1,
+.account-balance-heading h2,
+.account-balance-value  {
+    color: var(--text-primary);
 }
 
 .account-secondary {
-    padding: 10px 18px;
-    border: 1px solid #475569;
-    border-radius: 9px;
-    background: transparent;
-    color: #cbd5e1;
-    font: inherit;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
+    border: 1px solid var(--button-secondary-border);
+    background: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
 }
 
 .account-secondary:hover {
@@ -192,10 +185,10 @@
 
 .account-card {
     padding: 30px;
-    border: 1px solid rgba(148, 163, 184, 0.16);
+    border: 1px solid var(--card-border);
     border-radius: 18px;
-    background: rgba(17, 31, 50, 0.92);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
 }
 
 .account-grid {
@@ -215,16 +208,14 @@
     min-width: 220px;
 }
 .account-balance-card {
-    margin-bottom: 24px;
-    padding: 24px;
-    border: 1px solid rgba(96, 165, 250, 0.2);
-    border-radius: 16px;
-    background: linear-gradient(
-        135deg,
-        rgba(30, 64, 115, 0.55),
-        rgba(17, 31, 50, 0.95)
-    );
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  color: var(--text-primary);
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .account-balance-heading {
@@ -235,16 +226,7 @@
 }
 
 .account-balance-caption {
-    margin: 0 0 8px;
-    color: #94a3b8;
-    font-size: 14px;
-}
-
-.account-balance-heading h2 {
-    margin: 0;
-    color: #f8fafc;
-    font-size: 30px;
-    font-weight: 700;
+    color: var(--text-secondary);
 }
 
 .account-topup-button {
@@ -306,7 +288,6 @@
     box-sizing: border-box;
 }
 
-/* Блок возврата подписки */
 
 .account-refund {
     display: flex;
@@ -360,6 +341,35 @@
     font-size: 12px;
     line-height: 1.5;
     color: var(--text-secondary, #a1a1aa);
+}
+
+.account-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.account-theme-button {
+    white-space: nowrap;
+}
+.auth-input,
+.account-input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-input::placeholder,
+.account-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.auth-input:focus,
+.account-input:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
 @media (max-width: 800px) {

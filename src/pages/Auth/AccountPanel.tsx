@@ -6,6 +6,7 @@ import './Auth.css'
 import BalanceModal from '../../components/BalanceModal'
 import { useBalanceContext } from '../../context/BalanceContext'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../context/ThemeContext'
 
 import {
     getVpnKeys,
@@ -61,6 +62,7 @@ const AccountPanel = ({
     error,
 }: AccountPanelProps) => {
     const { token } = useAuth()
+    const { theme, toggleTheme } = useTheme()
 
     const [vpnKeys, setVpnKeys] = useState<VpnKey[]>([])
     const [vpnKeysLoading, setVpnKeysLoading] = useState(true)
@@ -231,13 +233,25 @@ const AccountPanel = ({
                         <h1>Личный кабинет</h1>
                     </div>
 
-                    <button
-                        className="account-secondary"
-                        type="button"
-                        onClick={onLogout}
-                    >
-                        Выйти
-                    </button>
+                    <div className="account-header-actions">
+    <button
+        className="account-secondary account-theme-button"
+        type="button"
+        onClick={toggleTheme}
+        aria-label="Переключить тему оформления"
+        aria-pressed={theme === 'light'}
+    >
+        {theme === 'dark' ? '☀ Светлая тема' : '☾ Тёмная тема'}
+    </button>
+
+    <button
+        className="account-secondary"
+        type="button"
+        onClick={onLogout}
+    >
+        Выйти
+    </button>
+</div>
                 </header>
 
                 <section className="account-balance-card">
