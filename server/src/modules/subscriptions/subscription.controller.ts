@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { Prisma } from '@prisma/client'
 import { randomBytes } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 
 import prisma from '../../config/prisma.js'
 import {
@@ -654,18 +655,27 @@ export const cancelReservation = async (req: Request, res: Response) => {
 
 
 export const getVpnKeys = async (req: Request, res: Response) => {
+    const requestId = randomUUID()
+    const log = (stage: string) => {
+        console.log(`[Get VPN keys][${requestId}] ${stage}`)
+    }
+
     try {
         const userId = req.userId
+
         if (!userId) {
             res.status(401).json({ success: false, message: 'Unauthorized' })
             return
         }
 
-        const now = new Date()
-        await prisma.vpnKey.updateMany({
-            where: { userId, status: 'ACTIVE', expiresAt: { lte: now } },
+        log('Starting updateMany')
+
+        const updateResult = await prisma.vpnKey.updateMany({
+            where: { userId, status: 'ACTIVE', expiresAt: { lte: new Date() } },
             data: { status: 'EXPIRED' },
         })
+
+        log(`updateMany completed; count=${updateResult.count}`)
 
         const keys = await prisma.vpnKey.findMany({
             where: { userId },
@@ -689,10 +699,17 @@ export const getVpnKeys = async (req: Request, res: Response) => {
             },
         })
 
+        log(`findMany completed; count=${keys.length}`)
+
         res.json({ success: true, data: { keys } })
     } catch (error) {
-        console.error('Get VPN keys error:', error)
-        res.status(500).json({ success: false, message: 'Failed to get VPN keys' })
+        log('Request failed')
+        console.error(`[Get VPN keys][${requestId}]`, error)
+
+        res.status(500).json({
+            success: false,
+            message: 'Failed to get VPN keys',
+        })
     }
 }
 
