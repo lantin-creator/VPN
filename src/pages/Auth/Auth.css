@@ -1,0 +1,426 @@
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    box-sizing: border-box;
+    background:
+        radial-gradient(ellipse at top left, rgba(40, 115, 210, 0.18), transparent 45%),
+        linear-gradient(135deg, #07111f 0%, #101d30 55%, #0a1423 100%);
+    color: #f1f5f9;
+    font-family: inherit;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 40px;
+    box-sizing: border-box;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 20px;
+    background: rgba(17, 31, 50, 0.92);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+}
+
+.auth-brand {
+    margin: 0 0 24px;
+    color: #60a5fa;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 3px;
+}
+
+.auth-title {
+    margin: 0 0 12px;
+    color: #f8fafc;
+    font-size: 32px;
+    line-height: 1.2;
+    font-weight: 750;
+}
+
+.auth-description {
+    margin: 0 0 30px;
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.6;
+}
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    color: #cbd5e1;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.auth-input {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    border: 1px solid #33465e;
+    border-radius: 9px;
+    outline: none;
+    background: #0b1727;
+    color: #f8fafc;
+    font: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-input::placeholder {
+    color: #64748b;
+}
+
+.auth-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.auth-input:read-only {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.auth-submit {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 4px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: #ffffff;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s, box-shadow 0.2s;
+}
+
+.auth-submit:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+}
+
+.auth-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.auth-error {
+    margin: 0;
+    color: #f87171;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.auth-switch {
+    margin: 25px 0 0;
+    color: #94a3b8;
+    text-align: center;
+    font-size: 14px;
+}
+
+.auth-link {
+    color: #60a5fa;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-link:hover {
+    color: #93c5fd;
+    text-decoration: underline;
+}
+.account-page {
+    min-height: 100vh;
+    padding: 50px 20px;
+    box-sizing: border-box;
+    background: var(--page-gradient);
+    color: var(--text-primary);
+    font-family: inherit;
+}
+
+.account-container {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.account-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.account-header .auth-brand {
+    margin-bottom: 10px;
+}
+
+.account-header h1,
+.account-balance-heading h2,
+.account-balance-value  {
+    color: var(--text-primary);
+}
+
+.account-secondary {
+    border: 1px solid var(--button-secondary-border);
+    background: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
+}
+
+.account-secondary:hover {
+    border-color: #64748b;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.account-card {
+    padding: 30px;
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+}
+
+.account-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.account-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+.account-actions .auth-submit {
+    width: auto;
+    min-width: 220px;
+}
+.account-balance-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  color: var(--text-primary);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.account-balance-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.account-balance-caption {
+    color: var(--text-secondary);
+}
+
+.account-topup-button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.account-topup-button:hover:not(:disabled) {
+    background: #3b82f6;
+    transform: translateY(-1px);
+}
+
+.account-topup-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.auth-home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.auth-home-link:hover {
+    color: #60a5fa;
+    transform: translateX(-3px);
+}
+.account-container {
+    max-width: 1100px;
+}
+
+.account-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.account-profile-column,
+.account-subscription-column {
+    min-width: 0;
+}
+
+.account-layout .account-card {
+    height: 100%;
+    box-sizing: border-box;
+}
+
+
+.account-refund {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.045);
+}
+
+.account-refund-info {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary, #a1a1aa);
+}
+
+.account-refund-info strong {
+    color: var(--text-primary, #fff);
+}
+
+.account-refund-button {
+    width: 100%;
+    padding: 11px 16px;
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.account-refund-button:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.75);
+}
+
+.account-refund-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.account-refund-hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary, #a1a1aa);
+}
+
+.account-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.account-theme-button {
+    white-space: nowrap;
+}
+.auth-input,
+.account-input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-input::placeholder,
+.account-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.auth-input:focus,
+.account-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+@media (max-width: 800px) {
+    .account-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .auth-card {
+        padding: 28px 22px;
+    }
+
+    .auth-title {
+        font-size: 27px;
+    }
+
+    .account-page {
+        padding: 30px 14px;
+    }
+
+    .account-header h1 {
+        font-size: 24px;
+    }
+
+    .account-card {
+        padding: 22px 18px;
+    }
+
+    .account-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .account-actions .auth-submit {
+        width: 100%;
+    }
+
+    .account-balance-card {
+        padding: 18px;
+    }
+
+    .account-balance-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .account-balance-heading h2 {
+        font-size: 26px;
+    }
+
+    .account-topup-button {
+        width: 100%;
+    }
+}
