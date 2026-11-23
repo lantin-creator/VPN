@@ -26,6 +26,15 @@ app.get('/api/health', (_req, res) => {
         message: 'RVPN backend is running',
     })
 })
+app.get('/api/health/db', async (_req, res) => {
+    try {
+        await prisma.$queryRaw`SELECT 1`
+        res.json({ success: true, message: 'Database is reachable' })
+    } catch (error) {
+        console.error('Health DB error:', error)
+        res.status(503).json({ success: false, message: 'Database is unavailable' })
+    }
+})
 
 app.use('/api/auth', authRoutes)
 app.use('/api/users', usersRoutes)
